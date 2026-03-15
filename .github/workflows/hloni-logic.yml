@@ -22,5 +22,6 @@ jobs:
       - name: Execute HMPD Engineering Logic
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          USER_PAYLOAD: ${{ json.encode(github.event.client_payload) }}
+          # Fixed line: We pass the raw JSON string from the event
+          USER_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: python hloni_engine.py
