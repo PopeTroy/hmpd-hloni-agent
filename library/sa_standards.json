@@ -1,7 +1,23 @@
 {
-  "civil_engineering": { "chassis_load_calc": "Steel_Weight * 1.25 (Safety_Factor)", "welding_standard": "ISO 5817 / SANS 10162" },
-  "architecture": { "sans_10400_xa": "Energy efficiency requirements for prefab insulation", "floorplan_logic": "Modular grid 300mm increments" },
-  "ablution_legal": { "ratio": "1 toilet per 15 users (Industrial)", "sans_10400_p": "Drainage and sanitation standards" },
-  "electrical": { "sans_10142": "Wiring of premises; requires 4mm wire for AC units", "solar_ready": "Hybrid inverter bypass logic" },
-  "legal_planning": { "zoning": "SPLUMA bylaws for modular placement", "friction_threshold": "6 months for permanent brick zoning" }
+  "electrical": {
+    "sans_10142": {
+      "socket_ratio": "1 double socket per 12m²",
+      "lighting_load": "5W per m² (LED)",
+      "ac_breaker": "20A to 30A depending on BTU",
+      "coc_required": "Mandatory for all new fixed installations",
+      "db_sizing": "Min 12-way for basic prefab; 24-way for complex/ablution"
+    }
+  },
+  "structural": {
+    "welding": "SANS 10162 - 6mm fillet welds for chassis joints",
+    "steel_framework": "75x50x20x2mm Lipless Channel for wall frames",
+    "chassis": "100x50x20x2.5mm Lip Channel for main runners"
+  },
+  "ablution": {
+    "sans_10400_p": {
+      "male_ratio": "1 toilet & 1 urinal per 20 users",
+      "female_ratio": "2 toilets per 15 users",
+      "disabled": "1 per facility block mandatory"
+    }
+  }
 }
