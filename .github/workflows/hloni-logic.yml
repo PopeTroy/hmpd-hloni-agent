@@ -16,7 +16,9 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install groq
+        run: |
+          python -m pip install --upgrade pip
+          pip install groq
 
       - name: Execute Senior Diagnostic
         env:
