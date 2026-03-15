@@ -1,68 +1,62 @@
 import os
 import json
-import math
+import re
 from groq import Groq
 
+# Initialize Groq
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-def calculate_structural_bill(size_sqm, building_type):
-    # Logic for Steel & Electrical Estimation
-    results = {}
+def calculate_hmpd_logic(details):
+    # Proper Steel Chassis Equation Logic
+    # Mass = (Area * JoistFactor) + (Perimeter * ChassisFactor)
+    # Extract dimensions from text (e.g., "6x3m" or "10 by 5")
+    dimensions = re.findall(r"(\d+)\s*[xXbyBy]\s*(\d+)", details)
     
-    # 1. Electrical Prediction (SANS 10142)
-    results['sockets'] = math.ceil(size_sqm / 12) * 2
-    results['lights'] = math.ceil(size_sqm / 10)
-    results['db_board'] = "24-Way Surface Mount" if size_sqm > 50 else "12-Way Flush Mount"
-    results['coc_legal'] = "Mandatory. Qualified Electrician required for sign-off."
+    if dimensions:
+        l, w = map(float, dimensions[0])
+        area = l * w
+        perimeter = 2 * (l + w)
+        
+        # HMPD Constants for CEDAR TREE BLOCK V1.3
+        joist_factor = 4.85 # kg/m2
+        chassis_factor = 12.4 # kg/m
+        
+        steel_mass = (area * joist_factor) + (perimeter * chassis_factor)
+        return round(steel_mass, 2), area
+    return 0, 0
 
-    # 2. Structural Steel Prediction
-    # Estimating linear meters of steel based on 600mm stud spacing
-    linear_meters = (size_sqm * 4.5) 
-    results['steel_estimate_kg'] = round(linear_meters * 1.8, 2) # approx kg for lipless channel
+def run_hloni_agent():
+    payload = json.loads(os.environ.get("USER_PAYLOAD", "{}"))
+    user_input = payload.get('details', '')
     
-    return results
-
-def run_hloni_master_audit(user_data):
-    size = float(user_data.get('size_sqm', 0))
-    b_type = user_data.get('type', 'general') # e.g., 'office', 'ablution', 'classroom'
-    users = int(user_data.get('expected_users', 1))
-
-    # Basic Math Logic before AI refinement
-    tech_specs = calculate_structural_bill(size, b_type)
+    mass, area = calculate_hmpd_logic(user_input)
     
-    prompt = f"""
-    You are Lehlonolo (Hloni). Perform a Pre-Inspection Audit for HMPD.co.za.
+    system_prompt = f"""
+    You are the HMPD Sales-Engineer (Hloni). 
+    You operate on the UESP PRCE Diagnostic Harvester V1.3.
     
-    USER PROJECT: {b_type}
-    SIZE: {size} sqm
-    USERS: {users}
-    BUDGET: R{user_data.get('budget')}
+    TECHNICAL DATA:
+    - Calculated Steel Mass: {mass}kg
+    - Calculated Area: {area}sqm
+    - Compliance: SANS 10400 (Building) & SANS 10142 (Electrical).
     
-    TECHNICAL PREDICTIONS:
-    - Electrical: {tech_specs['lights']} lights, {tech_specs['sockets']} sockets, {tech_specs['db_board']}.
-    - Steel Chassis/Frame: Approx {tech_specs['steel_estimate_kg']}kg.
-    - Compliance: {tech_specs['coc_legal']}
-    
-    Based on SANS 10400 (Building), SANS 10142 (Electrical), and Civil Engineering standards for Chassis/Welding:
-    1. Provide a detailed Dossier.
-    2. Check if a CoC (Certificate of Compliance) is needed for this specific setup.
-    3. If 'ablution', calculate EXACT toilets/basins for {users} users.
-    4. Recommend Air Conditioning (BTU size) and Wall Sockets placement.
-    5. Evaluate "Friction": If budget vs size is unrealistic, suggest Renovations.
-    
-    Identify as 'Hloni' and be extremely professional.
+    MISSION:
+    Provide a world-class salesman response. Explain the reasoning behind the 
+    {mass}kg steel requirement. Address the user's "I want/I need" query 
+    with engineering authority.
     """
 
-    # AI Synthesis
-    response = client.chat.completions.create(
-        messages=[{"role": "system", "content": "Master Industrial Auditor for HMPD."},
-                  {"role": "user", "content": prompt}],
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ],
         model="llama3-70b-8192",
     )
-    return response.choices[0].message.content
+    
+    # In a real live environment, you'd trigger a SendGrid or Mailgun API here 
+    # to send the final dossier to info@hmpd.co.za
+    print(chat_completion.choices[0].message.content)
 
 if __name__ == "__main__":
-    # Payload from the Website Floater
-    payload = json.loads(os.environ.get("USER_PAYLOAD", "{}"))
-    dossier = run_hloni_master_audit(payload)
-    print(dossier)
+    run_hloni_agent()
