@@ -1,27 +1,25 @@
-name: Hloni Agentic Engine V1.3
+name: Hloni Agentic Engine V1.6
 on:
   repository_dispatch:
-    types: [lead_captured, dossier_finalized]
+    types: [dossier_finalized]
 
 jobs:
-  process_intelligence:
+  structural_audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: |
-          pip install groq
+        run: pip install groq
 
-      - name: Execute HMPD Engineering Logic
+      - name: Execute Senior Diagnostic
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # Fixed line: We pass the raw JSON string from the event
           USER_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: python hloni_engine.py
