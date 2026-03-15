@@ -7,42 +7,32 @@ jobs:
   analyze_and_dossier:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Library
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Groq Inference & Predictive Audit
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install groq
+
+      - name: Run Hloni Predictive Logic
         id: hloni_logic
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          USER_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
-          # Hloni runs the Grand Prophetic Equation here
-          # Cross-references user size/budget against /library standards
-          echo "STEEL_WEIGHT=1450kg" >> $GITHUB_ENV
-          echo "ELECTRICAL_LOAD=45Amps" >> $GITHUB_ENV
-          echo "VIABILITY=Optimal" >> $GITHUB_ENV
+          python hloni_engine.py > dossier_output.txt
 
       - name: Send Dossier to HMPD Team
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.gmail.com # Change to your host if not Gmail
+          server_address: smtp.gmail.com
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
-          subject: "HLONI DOSSIER: High-Priority Lead [${{ github.event.client_payload.client_name }}]"
+          subject: "HLONI DOSSIER: High-Priority Lead Harvested"
           to: info@hmpd.co.za, sales@hmpd.co.za
-          body: |
-            Hloni (Lehlonolo) has harvested a new lead.
-            
-            PROJECT DATA:
-            - Size: ${{ github.event.client_payload.size }}
-            - Budget: R${{ github.event.client_payload.budget }}
-            
-            HLONI PREDICTIVE AUDIT:
-            - Steel Frame Chassis: ${{ env.STEEL_WEIGHT }}
-            - Electrical/AC Load: ${{ env.ELECTRICAL_LOAD }}
-            - SANS 10400 Compliance: Verified
-            - Decision: ${{ env.VIABILITY }} (Proceed to Manual Quote)
-            
-            CLIENT DETAILS:
-            - Name: ${{ github.event.client_payload.client_name }}
-            - Contact: ${{ github.event.client_payload.client_contact }}
-            
-            Action: Activate Microsoft Clarity for IP/Behavior tracking.
+          body_from_file: dossier_output.txt
