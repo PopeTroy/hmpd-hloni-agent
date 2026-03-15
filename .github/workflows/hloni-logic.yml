@@ -1,4 +1,4 @@
-name: Hloni Agentic Engine V1.6
+name: HMPD Agentic Engine V2.2
 on:
   repository_dispatch:
     types: [dossier_finalized]
