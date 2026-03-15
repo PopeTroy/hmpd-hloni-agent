@@ -1,0 +1,7 @@
+{
+  "civil_engineering": { "chassis_load_calc": "Steel_Weight * 1.25 (Safety_Factor)", "welding_standard": "ISO 5817 / SANS 10162" },
+  "architecture": { "sans_10400_xa": "Energy efficiency requirements for prefab insulation", "floorplan_logic": "Modular grid 300mm increments" },
+  "ablution_legal": { "ratio": "1 toilet per 15 users (Industrial)", "sans_10400_p": "Drainage and sanitation standards" },
+  "electrical": { "sans_10142": "Wiring of premises; requires 4mm wire for AC units", "solar_ready": "Hybrid inverter bypass logic" },
+  "legal_planning": { "zoning": "SPLUMA bylaws for modular placement", "friction_threshold": "6 months for permanent brick zoning" }
+}
