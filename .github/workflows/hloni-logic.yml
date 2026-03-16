@@ -3,10 +3,10 @@ name: HMPD Agentic Engine V2.3
 on:
   repository_dispatch:
     types: [dossier_finalized]
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to click "Run workflow" in GitHub Actions
 
 permissions:
-  contents: write
+  contents: write # Required to save the latest_audit.json back to the repo
 
 jobs:
   structural_audit:
@@ -28,13 +28,22 @@ jobs:
       - name: Execute Senior Diagnostic
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Handles both WordPress triggers and manual GitHub button runs
           USER_PAYLOAD: ${{ github.event.client_payload != null && toJson(github.event.client_payload) || '{"details":"Manual Diagnostic Check"}' }}
         run: python hloni_engine.py
 
-      - name: Commit Audit Result
+      - name: Commit and Push Audit Result
         run: |
           git config --global user.name "Hloni-Agent"
           git config --global user.email "agent@hmpd.co.za"
-          git add latest_audit.json
-          git commit -m "Update Latest Audit Result [skip ci]" || echo "No changes to commit"
-          git push
+          
+          # Check if the file exists to prevent Exit 128
+          if [ -f latest_audit.json ]; then
+            git add latest_audit.json
+            # Commit only if the file actually changed, otherwise skip to prevent errors
+            git commit -m "Update Latest Audit Result [skip ci]" || echo "No changes to commit"
+            git push
+          else
+            echo "CRITICAL ERROR: latest_audit.json was not created by the Python script."
+            exit 1
+          fi
