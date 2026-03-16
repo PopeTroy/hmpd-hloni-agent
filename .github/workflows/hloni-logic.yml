@@ -1,9 +1,12 @@
-name: HMPD Agentic Engine V2.2
+name: HMPD Agentic Engine V2.3
 
 on:
   repository_dispatch:
     types: [dossier_finalized]
-  workflow_dispatch: # This adds the "Run workflow" button in the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   structural_audit:
@@ -25,6 +28,13 @@ jobs:
       - name: Execute Senior Diagnostic
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # Safely handle the payload whether triggered by Dispatch or Manual run
           USER_PAYLOAD: ${{ github.event.client_payload != null && toJson(github.event.client_payload) || '{"details":"Manual Diagnostic Check"}' }}
         run: python hloni_engine.py
+
+      - name: Commit Audit Result
+        run: |
+          git config --global user.name "Hloni-Agent"
+          git config --global user.email "agent@hmpd.co.za"
+          git add latest_audit.json
+          git commit -m "Update Latest Audit Result [skip ci]" || echo "No changes to commit"
+          git push
