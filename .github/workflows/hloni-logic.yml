@@ -1,27 +1,62 @@
-name: HMPD Agentic Engine V2.2
-on:
-  repository_dispatch:
-    types: [dossier_finalized]
+import os
+import json
+from groq import Groq
 
-jobs:
-  structural_audit:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+# Initialize Groq Client
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+def analyze_structural_intent():
+    # 1. Capture the WordPress Handshake
+    try:
+        raw_payload = os.environ.get("USER_PAYLOAD", "{}")
+        payload = json.loads(raw_payload)
+    except Exception as e:
+        print(f"Error parsing payload: {e}")
+        payload = {"details": "No data received."}
+        
+    user_query = payload.get('details', 'General Inquiry')
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install groq
+    # 2. Senior State System Prompt
+    system_instruction = """
+    You are the Senior Technical Lead for Hloni Modular Prefab & Design.
+    Persona: Analytical, Logical, and highly professional.
+    
+    TASK: 
+    Perform a structural audit based on building ideas, issues, or budget.
+    
+    LOGIC PROTOCOL:
+    - Identify if the query involves a 'Budget', 'Building Idea', or 'Structural Issue'.
+    - Apply SANS 10400 compliance reasoning.
+    - If complexity is high, formally recommend a consultation.
+    
+    CONTACT DISCLOSURE RULE:
+    Only suggest direct contact if the logic proves bespoke engineering is required.
+    Contact: info@hmpd.co.za | Tel: +27 84 056 3815.
+    """
 
-      - name: Execute Senior Diagnostic
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          USER_PAYLOAD: ${{ toJson(github.event.client_payload) }}
-        run: python hloni_engine.py
+    try:
+        # 3. Agentic Processing - UPDATED MODEL NAME
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-specdec", 
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=0.2
+        )
+
+        report = completion.choices[0].message.content
+
+        # 4. Final Rendering
+        print("--------------------------------------------------")
+        print("UESP PRCE SENIOR STATE DIAGNOSTIC REPORT")
+        print("--------------------------------------------------")
+        print(report)
+        print("--------------------------------------------------")
+        print("AUDIT COMPLETE: DISPATCHED TO HMPD CORE.")
+
+    except Exception as e:
+        print(f"AGENTIC ERROR: Structural Engine failed to synthesize data. {e}")
+
+if __name__ == "__main__":
+    analyze_structural_intent()
