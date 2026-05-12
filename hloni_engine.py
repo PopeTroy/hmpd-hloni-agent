@@ -3,15 +3,13 @@ import json
 import math
 from groq import Groq
 from openai import OpenAI
-from fpdf import FPDF
+from fpdf import FPDF, XPos, YPos
 
 # System Initialization
-# nv_client remains for potential future NVIDIA NIM scaling
 nv_client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1", 
     api_key=os.environ.get("NVIDIA_API_KEY")
 )
-# groq_client handles the 70b-versatile model to prevent 404 errors
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 class HMPD_Quantum_Architect:
@@ -32,16 +30,14 @@ class HMPD_Quantum_Architect:
         return {"distance": f"{distance}km", "price": f"R{petrol_price}", "total": f"R{total_quote:.2f}"}
 
     def execute_coalition(self):
-        """Orchestrates 80 NVIDIA Agents, 500 RAG Clones, and 250 Watchdogs"""
+        """Orchestrates 80 Agents via Groq Versatile Path"""
         system_logic = (
             "Framework: UESP PRCE Diagnostic. "
             "Coalition: 80 NVIDIA Agents, 500 RAG Clones, 250 Watchdogs. "
             "Tactics: Shinobi Quantum Physics, Thermodynamics, Stoichiometry. "
-            "Scope: Earth and Martian modular colonization. "
-            "Equations: Einstein, Newton, Brus, and the Unified Grand Prophetic Equation."
+            "Equations: Unified Grand Prophetic Equation."
         )
         
-        # MODEL ROUTE: Routed to Groq to resolve NVIDIA 404
         response = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile", 
             messages=[
@@ -53,26 +49,37 @@ class HMPD_Quantum_Architect:
         return response.choices[0].message.content
 
     def generate_pdf_quote(self, report, logistics):
-        """Creates high-fidelity GitHub-style PDF layout"""
+        """Creates high-fidelity professional layout with Unicode safety"""
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_fill_color(13, 17, 23) # GitHub Dark Mode
+        
+        # Set background to professional dark slate
+        pdf.set_fill_color(13, 17, 23) 
         pdf.rect(0, 0, 210, 297, 'F')
         
-        pdf.set_text_color(88, 166, 255) # GitHub Blue
-        pdf.set_font("Courier", 'B', 16)
-        pdf.cell(0, 10, "HMPD QUANTUM ARCHITECTURAL AUDIT", ln=True, align='C')
+        # Header - Using Arial for better character support and updated ln logic
+        pdf.set_text_color(0, 212, 255) # Arctic Neon Blue
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 10, "HMPD QUANTUM ARCHITECTURAL AUDIT", 
+                 new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
         
-        pdf.set_text_color(201, 209, 217) # GitHub Gray
-        pdf.set_font("Courier", size=10)
-        pdf.cell(0, 10, f"TXN ID: {self.txn_id} | SESSION: {self.session_id}", ln=True)
+        # Meta Info
+        pdf.set_text_color(201, 209, 217) 
+        pdf.set_font("Arial", size=10)
+        pdf.cell(0, 10, f"TXN ID: {self.txn_id} | SESSION: {self.session_id}", 
+                 new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         pdf.ln(5)
         
-        pdf.multi_cell(0, 5, report.replace("\n", "\n"))
+        # Content Sanitization: Replace unsupported Unicode symbols with 'R' or '?'
+        safe_report = report.encode('latin-1', 'replace').decode('latin-1')
+        
+        pdf.multi_cell(0, 5, safe_report)
         pdf.ln(10)
         
-        pdf.set_text_color(56, 139, 253)
-        pdf.cell(0, 10, f"REAL-TIME LOGISTICS QUOTE: {logistics['total']}", ln=True)
+        # Footer
+        pdf.set_text_color(0, 212, 255)
+        pdf.cell(0, 10, f"REAL-TIME LOGISTICS QUOTE: {logistics['total']}", 
+                 new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         pdf.output(f"{self.txn_id}.pdf")
 
 def main():
