@@ -25,7 +25,7 @@ class HMPD_Quantum_Architect:
 
     def calculate_realtime_logistics(self):
         """Calculates petrol and distance for real-time ZAR quotes"""
-        # Dynamic calculation based on client session ID
+        # Dynamic calculation for South African logistics
         distance = 150.0  
         petrol_price = 22.85 
         total_quote = (distance * 0.12) * petrol_price 
@@ -68,7 +68,7 @@ class HMPD_Quantum_Architect:
         pdf.cell(0, 10, f"TXN ID: {self.txn_id} | SESSION: {self.session_id}", ln=True)
         pdf.ln(5)
         
-        pdf.multi_cell(0, 5, report.replace("<br>", "\n"))
+        pdf.multi_cell(0, 5, report.replace("\n", "\n"))
         pdf.ln(10)
         
         pdf.set_text_color(56, 139, 253)
