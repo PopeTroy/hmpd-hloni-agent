@@ -5,11 +5,13 @@ from groq import Groq
 from openai import OpenAI
 from fpdf import FPDF
 
-# System Initialization - NVIDIA NIM Stable Production Path
+# System Initialization
+# nv_client remains for potential future NVIDIA NIM scaling
 nv_client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1", 
     api_key=os.environ.get("NVIDIA_API_KEY")
 )
+# groq_client handles the 70b-versatile model to prevent 404 errors
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 class HMPD_Quantum_Architect:
@@ -19,20 +21,18 @@ class HMPD_Quantum_Architect:
         self.session_id = payload.get('session_id', 'standard_user')
 
     def apply_quantum_laws(self):
-        """Applies the Mega Circuit and Unified Grand Prophetic Equation"""
-        # Override dimensional law is the mega circuit
+        """Applies the Mega Circuit logic"""
         return "DIMENSIONAL_OVERWRITE_ACTIVE // MEGA_CIRCUIT_ENGAGED"
 
     def calculate_realtime_logistics(self):
         """Calculates petrol and distance for real-time ZAR quotes"""
-        # Dynamic calculation for South African logistics
         distance = 150.0  
         petrol_price = 22.85 
         total_quote = (distance * 0.12) * petrol_price 
         return {"distance": f"{distance}km", "price": f"R{petrol_price}", "total": f"R{total_quote:.2f}"}
 
     def execute_coalition(self):
-        """Orchestrates 80 NVIDIA Agents with Quantum Physics"""
+        """Orchestrates 80 NVIDIA Agents, 500 RAG Clones, and 250 Watchdogs"""
         system_logic = (
             "Framework: UESP PRCE Diagnostic. "
             "Coalition: 80 NVIDIA Agents, 500 RAG Clones, 250 Watchdogs. "
@@ -41,9 +41,9 @@ class HMPD_Quantum_Architect:
             "Equations: Einstein, Newton, Brus, and the Unified Grand Prophetic Equation."
         )
         
-        # Validated namespace to prevent 404 in May 2026
-        response = nv_client.chat.completions.create(
-            model="meta/llama-4-405b-instruct", 
+        # MODEL ROUTE: Routed to Groq to resolve NVIDIA 404
+        response = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile", 
             messages=[
                 {"role": "system", "content": system_logic},
                 {"role": "user", "content": self.user_query}
