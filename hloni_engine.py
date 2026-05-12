@@ -41,9 +41,9 @@ class HMPD_Quantum_Architect:
             "Equations: Einstein, Newton, Brus, and the Unified Grand Prophetic Equation."
         )
         
-        # Validated namespace to prevent 404
+        # Validated namespace to prevent 404 in May 2026
         response = nv_client.chat.completions.create(
-            model="nvidia/llama-3.3-70b-instruct", 
+            model="meta/llama-4-405b-instruct", 
             messages=[
                 {"role": "system", "content": system_logic},
                 {"role": "user", "content": self.user_query}
